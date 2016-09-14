@@ -24,7 +24,7 @@ func mainLoop(L *LState, baseframe *callFrame) {
 		return
 	}
 
-	for {
+	for !L.Dead {
 		cf = L.currentFrame
 		inst = cf.Fn.Proto.Code[cf.Pc]
 		cf.Pc++
