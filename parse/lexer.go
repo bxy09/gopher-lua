@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 const EOF = -1
@@ -408,9 +409,21 @@ redo:
 			tok.Type = ch
 			tok.Str = string(ch)
 		default:
-			writeChar(buf, ch)
-			err = sc.Error(buf.String(), "Invalid token")
+			readNum := 0
+			for ; readNum<utf8.MaxRune && ch!=EOF; ch = sc.Next() {
+				readNum++
+				writeChar(buf, ch)
+				if utf8.FullRune(buf.Bytes()) {
+					break
+				}
+			}
+			if utf8.FullRune(buf.Bytes()) {
+				err = sc.Error(buf.String(), "Invalid token")
+			} else {
+				err = sc.Error("<invalid utf8>", "Invalid token")
+			}
 			goto finally
+
 		}
 	}
 
