@@ -410,7 +410,7 @@ redo:
 			tok.Str = string(ch)
 		default:
 			readNum := 0
-			for ; readNum<utf8.MaxRune && ch!=EOF; ch = sc.Next() {
+			for ; readNum < utf8.MaxRune && ch != EOF; ch = sc.Next() {
 				readNum++
 				writeChar(buf, ch)
 				if utf8.FullRune(buf.Bytes()) {

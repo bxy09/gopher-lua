@@ -1,0 +1,46 @@
+syntax = "proto3";
+package lua;
+
+message PLFunction {
+    uint64 Env = 1;
+    uint64 Proto = 2;
+    repeated uint64 Upvalues = 3;
+}
+
+message PLTable {
+    repeated PLValue  Array = 1;
+    repeated PLValue Keys = 2;
+    repeated PLValue Values = 3;
+}
+
+message PElement {
+    oneof element{
+        PLFunction Fn = 1;
+        PLTable Table = 2;
+        string Builtin = 3;
+    }
+}
+
+message PUpvalue {
+    PLValue Value = 1;
+}
+
+message PFnProto {
+    uint64 Idx = 1;
+}
+
+message PCheckpoint{
+    map<uint64, PUpvalue> Upvalues = 1;
+    map<uint64, PElement> Gotten = 2;
+    map<uint64, PFnProto> Protos = 3;
+    repeated uint64 Targets = 4;
+}
+
+message PLValue {
+    oneof value {
+        string Str = 1;
+        uint64 Ptr = 2;
+        double Number = 3;
+        bool Nil = 4;
+    }
+}
