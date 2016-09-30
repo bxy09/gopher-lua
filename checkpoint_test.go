@@ -3,6 +3,7 @@ package lua
 import (
 	"encoding/json"
 	"testing"
+	"github.com/golang/protobuf/proto"
 )
 
 var script = `
@@ -33,7 +34,7 @@ var script = `
 	builtin2 = function ()
 		return 2
 	end
-	env = {kk = {a=1,b=2},}
+	env = {kk = {a=1,b=2,c=true},}
 	setfenv(userfn, env)
 	`
 
@@ -109,6 +110,15 @@ func TestCheckpoint(t *testing.T) {
 	}))
 	fnADup.Env.RawSetString("LBuiltin", bIn1)
 	fnADup.Env.RawSetString("GBuiltin", bIn2)
+	bytes, err = proto.Marshal(cp)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cp = &PCheckpoint{}
+	err = proto.Unmarshal(bytes, cp)
+	if err != nil {
+		t.Fatal(err)
+	}
 	err = LoadCheckpoint(cp, map[LValue]string{bIn1: "lua", bIn2: "go"}, stateDup.GetGlobal("userfn").(*LFunction).Proto, fnADup.Env, fnADup, fnBDup)
 	if err != nil {
 		t.Fatal(err)

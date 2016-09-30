@@ -14,7 +14,7 @@ message PLTable {
 }
 
 message PElement {
-    oneof element{
+    oneof Element{
         PLFunction Fn = 1;
         PLTable Table = 2;
         string Builtin = 3;
@@ -37,10 +37,11 @@ message PCheckpoint{
 }
 
 message PLValue {
-    oneof value {
+    oneof Value {
         string Str = 1;
         uint64 Ptr = 2;
         double Number = 3;
-        bool Nil = 4;
+        bool Bool = 4;
+        bool Nil = 5;
     }
 }

@@ -11,7 +11,7 @@ var ErrCannotFlattenLGFunction = errors.New("不支持FlattenGo函数")
 var ErrUpvalueNotClosed = errors.New("Flatten时发现Upvalue没有处于关闭状态")
 
 func isStatic(value LValue) bool {
-	return value.Type() == LTNumber || value.Type() == LTString || value.Type() == LTNil
+	return value.Type() == LTNumber || value.Type() == LTString || value.Type() == LTNil || value.Type() == LTBool
 }
 
 func uint64Pointer(target interface{}) uint64 {
@@ -26,6 +26,8 @@ func toPLValue(value LValue) *PLValue {
 		return &PLValue{Value: &PLValue_Number{Number: float64(value.(LNumber))}}
 	case LTString:
 		return &PLValue{Value: &PLValue_Str{Str: string(value.(LString))}}
+	case LTBool:
+		return &PLValue{Value: &PLValue_Bool{Bool: bool(value.(LBool))}}
 	default:
 	}
 	return &PLValue{Value: &PLValue_Ptr{Ptr: uint64Pointer(value)}}
@@ -158,6 +160,8 @@ func LoadCheckpoint(checkpoint *PCheckpoint, builtin map[LValue]string, rootProt
 			return LString(v.Str)
 		case *PLValue_Nil:
 			return LNil
+		case *PLValue_Bool:
+			return LBool(v.Bool)
 		default:
 		}
 		return getOrBuild(value.GetPtr())
@@ -176,6 +180,9 @@ func LoadCheckpoint(checkpoint *PCheckpoint, builtin map[LValue]string, rootProt
 			return value
 		}
 		element := checkpoint.Gotten[ptr]
+		if element == nil || element.Element == nil {
+			panic("Cannot find the thing for ptr")
+		}
 		if fn := element.GetFn(); fn != nil {
 			idx, exist := checkpoint.Protos[fn.Proto]
 			if !exist {
@@ -212,7 +219,7 @@ func LoadCheckpoint(checkpoint *PCheckpoint, builtin map[LValue]string, rootProt
 			var exist bool
 			gotten[ptr], exist = inverseBuiltin[element.GetBuiltin()]
 			if !exist {
-				panic("no such builtin module")
+				panic("no such builtin module:" + element.GetBuiltin())
 			}
 		}
 		return gotten[ptr]
